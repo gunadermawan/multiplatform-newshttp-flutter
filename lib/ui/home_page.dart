@@ -2,8 +2,10 @@ import 'dart:io';
 
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
+import 'package:newshttp/data/api/api_service.dart';
+import 'package:newshttp/provider/news_provider.dart';
 import 'package:newshttp/ui/article_list_page.dart';
-import 'package:newshttp/ui/settings_page.dart';
+import 'package:provider/provider.dart';
 
 import '../widgets/platform_widget.dart';
 
@@ -19,9 +21,11 @@ class HomePage extends StatefulWidget {
 class _HomePageStart extends State<HomePage> {
   int _bottomNavIndex = 0;
   static const String _headlineText = 'headline';
-  final List<Widget> _listWidget = const [
-    ArticleListPage(),
-    SettingsPage(),
+  final List<Widget> _listWidget = [
+    ChangeNotifierProvider<NewsProvider>(
+      create: (_) => NewsProvider(apiService: ApiService()),
+      child: const ArticleListPage(),
+    )
   ];
 
   final List<BottomNavigationBarItem> _bottomNavigationBarItem = [

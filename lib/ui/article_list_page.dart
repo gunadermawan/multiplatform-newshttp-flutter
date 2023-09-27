@@ -1,8 +1,9 @@
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:newshttp/data/model/article.dart';
+import 'package:newshttp/provider/news_provider.dart';
 import 'package:newshttp/widgets/card_article.dart';
-
+import 'package:provider/provider.dart';
 import '../data/api/api_service.dart';
 import '../widgets/platform_widget.dart';
 
@@ -23,31 +24,35 @@ class _ArticleListPageState extends State<ArticleListPage> {
   }
 
   Widget _buildList(BuildContext context) {
-    return FutureBuilder(
-      future: _article,
-      builder: (context, AsyncSnapshot<ArticleResult> snapshot) {
-        var state = snapshot.connectionState;
-        if (state != ConnectionState.done) {
-          return const Center(child: CircularProgressIndicator());
+    return Consumer<NewsProvider>(
+      builder: (context, state, _) {
+        if (state.state == ResultState.loading) {
+          return const Center(
+            child: CircularProgressIndicator(),
+          );
+        } else if (state.state == ResultState.hasData) {
+          return ListView.builder(itemBuilder: (context, index) {
+            var article = state.result.articles[index];
+            return CardArticle(article: article);
+          });
+        } else if (state.state == ResultState.noData) {
+          return Center(
+            child: Material(
+              child: Text(state.message),
+            ),
+          );
+        } else if (state.state == ResultState.error) {
+          return Center(
+            child: Material(
+              child: Text(state.message),
+            ),
+          );
         } else {
-          if (snapshot.hasData) {
-            return ListView.builder(
-              shrinkWrap: true,
-              itemCount: snapshot.data?.articles.length,
-              itemBuilder: (context, index) {
-                var article = snapshot.data?.articles[index];
-                return CardArticle(article: article!);
-              },
-            );
-          } else if (snapshot.hasError) {
-            return Center(
-              child: Material(
-                child: Text(snapshot.error.toString()),
-              ),
-            );
-          } else {
-            return const Material(child: Text(''));
-          }
+          return const Center(
+            child: Material(
+              child: Text(''),
+            ),
+          );
         }
       },
     );
